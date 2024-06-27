@@ -23,79 +23,64 @@ func main() {
 		if input == "" {
 			continue
 		}
-		result, err := calculate(input)
-		if err != nil {
-			fmt.Printf("Ошибка: %v\n", err)
-			return
-		}
+		result := calculate(input)
 		fmt.Println(result)
 	}
 }
 
-func calculate(input string) (string, error) {
+func calculate(input string) string {
 	parts := strings.Fields(input)
 	if len(parts) != 3 {
-		return "", fmt.Errorf("неверный формат ввода")
+		panic("Неверный формат ввода")
 	}
 
-	a, aIsRoman, err := parseNumber(parts[0])
-	if err != nil {
-		return "", err
-	}
-
-	b, bIsRoman, err := parseNumber(parts[2])
-	if err != nil {
-		return "", err
-	}
+	a, aIsRoman := parseNumber(parts[0])
+	b, bIsRoman := parseNumber(parts[2])
 
 	if aIsRoman != bIsRoman {
-		return "", fmt.Errorf("используются разные системы счисления")
+		panic("Используются разные системы счисления")
 	}
 
-	op := parts[1]
-	result, err := performOperation(a, b, op)
-	if err != nil {
-		return "", err
-	}
+	result := performOperation(a, b, parts[1])
 
 	if aIsRoman {
 		if result < 1 {
-			return "", fmt.Errorf("результат работы с римскими числами должен быть больше нуля")
+			panic("Результат работы с римскими числами должен быть больше нуля")
 		}
-		return intToRoman(result), nil
+		return intToRoman(result)
 	}
 
-	return fmt.Sprintf("%d", result), nil
+	return fmt.Sprintf("%d", result)
 }
 
-func parseNumber(s string) (int, bool, error) {
+func parseNumber(s string) (int, bool) {
 	if val, ok := romanNumerals[s]; ok {
-		return val, true, nil
+		return val, true
 	}
 
 	var n int
 	_, err := fmt.Sscanf(s, "%d", &n)
 	if err != nil || n < 1 || n > 10 {
-		return 0, false, fmt.Errorf("недопустимое число: %s", s)
+		panic("Недопустимое число: " + s)
 	}
-	return n, false, nil
+	return n, false
 }
 
-func performOperation(a, b int, op string) (int, error) {
+func performOperation(a, b int, op string) int {
 	switch op {
 	case "+":
-		return a + b, nil
+		return a + b
 	case "-":
-		return a - b, nil
+		return a - b
 	case "*":
-		return a * b, nil
+		return a * b
 	case "/":
 		if b == 0 {
-			return 0, fmt.Errorf("деление на ноль")
+			panic("Деление на ноль")
 		}
-		return a / b, nil
+		return a / b
 	default:
-		return 0, fmt.Errorf("неподдерживаемая операция: %s", op)
+		panic("Неподдерживаемая операция: " + op)
 	}
 }
 
